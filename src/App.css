@@ -1,0 +1,104 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.container-fluid {
+  background-color: rgb(227, 245, 234);
+  border: 2px solid black;
+  display: flex;
+    justify-content: center;	
+}
+
+#registro {
+  background-color:  rgb(173, 241, 197);
+  border: 2px solid black;
+    justify-content: center;	
+    text-align: center;
+}
+.wrapper {
+  display: grid;
+  grid-template-columns: 400px 400px ;
+}
+
+.table-wrapper {
+  width: 100%;
+  height: 200px; /* Altura de ejemplo */
+  overflow: auto;
+}
+
+.table-wrapper table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-wrapper table thead {
+  position: -webkit-sticky; /* Safari... */
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+
+.table-wrapper table thead th,
+.table-wrapper table tbody td {
+  border: 1px solid #000;
+  background-color: #FFF;
+}
+
+.dash {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 100px;
+}
+.box1 {
+  grid-column-start: 3;
+  grid-column-end: 5;
+  grid-row-start: 5;
+  grid-row-end: 10;
+}
+.box2{
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start:8;
+  grid-row-end: 11;
+}
+.box3 {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 2;
+  grid-row-end: 5;
+}
