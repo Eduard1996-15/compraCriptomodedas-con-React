@@ -17,7 +17,7 @@ const Dashboard = () => {
   const [cargado, setCargado] = useState(false);
  let navigate = useNavigate();
   useEffect(() => {
-     if(idUsu !== localStorage.getItem('idUsu')){
+     if(idUsu.toString() !== localStorage.getItem('idUsu')){
       navigate("/Login");
       window.location.reload();
     } 

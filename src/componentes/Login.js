@@ -1,37 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate,Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { guardarUsuario } from '../features/usuarioSlice';
 
 const Login = () => {
   const dispatch = useDispatch();
-  let idUsu = 0;
-  let token = "";
-  let usu = useRef(null);
-  let pas = useRef(null);
+  const navigate = useNavigate();
   const urlBase = 'https://crypto.develotion.com/';
-  const [miLogin, setMiLogin] = useState('false');
+  
+  // Referencias para los inputs
+  const usu = useRef(null);
+  const pas = useRef(null);
+  
+  // Estados
+  const [miLogin, setMiLogin] = useState(false);
   const [miPassword, setPassword] = useState('');
   const [miUsuario, setUsuario] = useState('');
-  let Logueo;
-  let navigate = useNavigate();
-  useEffect(() => {
-    let u = usu.current.value;
-    let p = pas.current.value;
-    if (u != "" && p != "") {
-      //muestro botom de login
-      document.getElementById('logi').style.display = 'block';
-      document.getElementById('logi').style = 'margin-left: 50px; text-align: center;';
-    }
-    else {
-      //oculto boton de login
-      document.getElementById('logi').style.display = "none";
-    }
-  }
-  );
+  const [mensaje, setMensaje] = useState('');
 
-  Logueo = (Usuario) => {
-    let res = "";
+  // Efecto para mostrar/ocultar botón de login
+  useEffect(() => {
+    if (usu.current && pas.current) {
+      const u = usu.current.value;
+      const p = pas.current.value;
+      
+      if (u !== "" && p !== "") {
+        document.getElementById('logi').style.display = 'block';
+        document.getElementById('logi').style.marginLeft = '50px';
+        document.getElementById('logi').style.textAlign = 'center';
+      } else {
+        document.getElementById('logi').style.display = "none";
+      }
+    }
+  }, [miUsuario, miPassword]); // Dependencias correctas
+
+  const Logueo = (Usuario) => {
     fetch(urlBase + 'login.php', {
       method: 'POST',
       headers: {
@@ -42,81 +45,109 @@ const Login = () => {
       .then(response => response.json())
       .then(data => {
         if (data.codigo !== 200) {
-          res = "Usuario o contraseña incorrectos";
-          document.querySelector('#res').innerHTML = res;
-
+          setMensaje("Usuario o contraseña incorrectos");
         } else {
-          console.log(data);
-          token = data.apiKey;//guardamos el token
-         
-          idUsu = data.id;//guardamos el idUsuario
-          if (token !== "" && token !== undefined)
-           localStorage.setItem('token', token);
-           localStorage.setItem('idUsu', idUsu);
-           localStorage.setItem('nom', Usuario.usuario);
-           let u = {'token':token, 'idUsu':idUsu};
-            dispatch((guardarUsuario(u)));
-           if(data.codigo === 200){
-            navigate('/Dashboard');
-            res = "El usuario ha sido logueado correctamente";
-            }else{
-              res = "Usuario y/o contraseña incorrectos";
-              navigate('/Dashboard');
-            }
+          console.log("Login exitoso:", data);
           
+          // Guardamos datos en localStorage
+          localStorage.setItem('token', data.apiKey);
+          localStorage.setItem('idUsu', data.id);
+          localStorage.setItem('nom', Usuario.usuario);
+          
+          // Guardamos en Redux
+          const u = {
+            'token': data.apiKey, 
+            'idUsu': data.id
+          };
+          dispatch(guardarUsuario(u));
+          
+          setMensaje("El usuario ha sido logueado correctamente");
+          setMiLogin(true);
+          
+          // Navegación después de un pequeño delay para asegurar que todo se ha actualizado
+          setTimeout(() => {
+            navigate('/Dashboard');
+          }, 100);
         }
-        document.querySelector('#res').innerHTML = res;
-
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.error("Error en login:", error);
+        setMensaje("Error de conexión. Intente nuevamente.");
+      });
   }
-  function iniciarSesion(e) {
+
+  const iniciarSesion = (e) => {
     e.preventDefault();
-    let txtusu = document.getElementById('txtusu').value;
-    let txtpass = document.getElementById('txtpas').value;
+    
+    const txtusu = usu.current.value;
+    const txtpass = pas.current.value;
+    
     if (txtusu === "" || txtpass === "") {
       alert('Debe ingresar usuario y contraseña');
+      return;
     }
-    else {
-      if (Validar(txtusu, txtpass)) {
-
-        setUsuario(txtusu);
-        setPassword(txtpass);
-        const Usuario = {
-          usuario: txtusu,
-          password: txtpass
-        };
-        Logueo(Usuario);
-      }
-      else {
-        setMiLogin('false');
-        alert('Usuario o contraseña incorrectos');
-      }
+    
+    if (Validar(txtusu, txtpass)) {
+      setUsuario(txtusu);
+      setPassword(txtpass);
+      
+      const Usuario = {
+        usuario: txtusu,
+        password: txtpass
+      };
+      
+      Logueo(Usuario);
+    } else {
+      setMiLogin(false);
+      alert('Usuario o contraseña incorrectos');
     }
   }
-  function Validar(usuario, password) {
-    if (usuario === "" || password === "" || usuario === null || password === null) {
-      return false;
-    }
-    return true;
-    
+
+  const Validar = (usuario, password) => {
+    return usuario !== "" && password !== "" && usuario !== null && password !== null;
   }
 
   return (
-    <div className="container-fluid " style={{ background: "lightgray", marginTop: 20, padding: 20 }}>
+    <div className="container-fluid" style={{ background: "lightgray", marginTop: 20, padding: 20 }}>
       <div id="log">
         <form id="form_login">
           <div>
-            <h1 style={{ color: "blue", textalign: "center" }}>LOGIN</h1>
+            <h1 style={{ color: "blue", textAlign: "center" }}>LOGIN</h1>
             <label htmlFor="txtusu"><strong>Username</strong></label>
-            <input type="text" ref={usu} id="txtusu" style={{ textAlign: "center" }} placeholder='usuario' className="form-control" onChange={(e) => setUsuario(e.target.value)} required />
+            <input 
+              type="text" 
+              ref={usu} 
+              id="txtusu" 
+              style={{ textAlign: "center" }} 
+              placeholder='usuario' 
+              className="form-control" 
+              onChange={(e) => setUsuario(e.target.value)} 
+              required 
+            />
           </div>
           <div>
             <label htmlFor="txtpas"><strong>Password</strong></label>
-            <input type="password" ref={pas} id="txtpas" style={{ textAlign: "center" }} placeholder='clave' className="form-control" onChange={(e) => setPassword(e.target.value)} required />
+            <input 
+              type="password" 
+              ref={pas} 
+              id="txtpas" 
+              style={{ textAlign: "center" }} 
+              placeholder='clave' 
+              className="form-control" 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
+            />
           </div>
-          <p id='res'></p>
-          <button type="buttom" id='logi' onClick={iniciarSesion} className="btn btn-primary ">Iniciar Sesión</button> <br />
+          <p id='res'>{mensaje}</p>
+          <button 
+            type="button" 
+            id='logi' 
+            onClick={iniciarSesion} 
+            className="btn btn-primary"
+          >
+            Iniciar Sesión
+          </button>
+          <br />
           <Link to="/">Crear cuenta</Link>
           <br />
         </form>
